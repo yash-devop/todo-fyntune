@@ -7,6 +7,7 @@ import { ExtendedTodoSchemaType } from "../lib/types/types";
 import { DueBadge } from "./DueBadge";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { fetcher } from "../lib/fetcher";
+import { toast } from "sonner";
 
 export default function TodoItem({
     todos
@@ -30,6 +31,11 @@ export default function TodoItem({
                 queryClient.invalidateQueries({
                     queryKey: ["todos"]
                 })
+                toast.success("Todo Deleted Successfully")
+                setOpen(false);
+            },
+            onError: ()=>{
+                toast.success("Something went wrong.");
                 setOpen(false);
             }
         })
