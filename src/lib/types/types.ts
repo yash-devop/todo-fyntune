@@ -3,7 +3,9 @@ import { todoSchema } from "../schemas/schemas"
 
 
 export type TodoSchemaType = InferType<typeof todoSchema>;
-
+export interface ExtendedTodoSchemaType extends TodoSchemaType {
+    id?: string
+}
 
 type ModalType = "add" | "edit";
 export type ModalProps<T> = {
