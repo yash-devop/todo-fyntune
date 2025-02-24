@@ -3,25 +3,31 @@ import { Button } from "./ui/Button";
 import { Calendar } from "lucide-react";
 import React, { useEffect, useRef, useState } from "react";
 import { SubmitHandler, useForm } from "react-hook-form";
-import { ModalProps, TodoSchemaType } from "../lib/types/types";
+import { ExtendedTodoSchemaType, ModalProps, TodoSchemaType } from "../lib/types/types";
 import { todoSchema } from "../lib/schemas/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { axiosClient } from "../lib/api/api";
-
+import { useMutation, useQueryClient} from "@tanstack/react-query"
+import { fetcher } from "../lib/fetcher";
 
 export default function Modal<T extends TodoSchemaType>({
+    type,
     open,
     setOpen,
     data
 }:ModalProps<T>){
+
     const [showDate , setShowDate] = useState("")
     const dateInputRef = useRef<HTMLInputElement>(null);
+    const queryClient = useQueryClient();
+
+
     const {
         handleSubmit,
         register,
         setValue,
         getValues,
         clearErrors,
+        reset,
         formState: {
             errors,
         }
@@ -30,13 +36,50 @@ export default function Modal<T extends TodoSchemaType>({
         defaultValues: {...data}
     });
 
+    const {mutate} = useMutation({
+        mutationFn: fetcher,
+        onMutate: async(todo)=>{
+            console.log('onmutatetetet', todo.body);
+            await queryClient.cancelQueries({ queryKey: ["todo"] });
+            const prevTodos = queryClient.getQueryData<TodoSchemaType>(["todos"])
+            console.log('prevTodos', prevTodos);
+        },
+        onSuccess: ()=>{
+            queryClient.invalidateQueries({
+                queryKey: ["todos"]
+            })
+            reset();
+        }
+    })
+
     const onDateChange=(e:React.ChangeEvent<HTMLInputElement>)=>{
         setValue("dueDate",e.target.valueAsDate?.toISOString()!);
         setShowDate(e.target.value) 
     }
 
-    const onSubmit:SubmitHandler<TodoSchemaType>=(data)=>{
-        console.log('dadta',data);
+    const onSubmit:SubmitHandler<ExtendedTodoSchemaType>=async(data)=>{
+        if(type === "add"){
+            mutate({
+                method: "POST",
+                path: "/todos",
+                body: data
+            }, {
+                onSuccess: ()=>{
+                    setOpen(false)
+                }
+            })
+        }
+        else if(type === "edit"){
+            mutate({
+                method: "PUT",
+                path: `/todos/${data.id}`,
+                body: data
+            }, {
+                onSuccess: ()=>{
+                    setOpen(false)
+                }
+            })
+        }
     }
 
     const handleDateClick=()=>{
@@ -83,7 +126,7 @@ export default function Modal<T extends TodoSchemaType>({
                         </div>
                         <div className="flex justify-end gap-4">
                             <Button onClick={() => setOpen(false)} variant={"ghost"} size={"sm"} className="hover:bg-neutral-200 hover:text-black cursor-pointer">Cancel</Button>
-                            <Button type="submit" variant={"default"} size={"sm"} className="cursor-pointer">Create Task</Button>
+                            <Button type="submit" variant={"default"} size={"sm"} className="cursor-pointer">Submit</Button>
                         </div>
                     </div>
                 </DialogPanel>
