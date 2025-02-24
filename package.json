@@ -8,6 +8,8 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "server": "npx json-server src/db.json"
+
   },
   "dependencies": {
     "@headlessui/react": "^2.2.0",
