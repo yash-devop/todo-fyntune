@@ -1,8 +1,8 @@
 import {InferType} from "yup"
-import { teamSchema } from "../schemas/schemas"
+import { todoSchema } from "../schemas/schemas"
 
 
-export type TeamSchemaType = InferType<typeof teamSchema>;
+export type TodoSchemaType = InferType<typeof todoSchema>;
 
 export type ModalProps<T> = {
     open: boolean,
