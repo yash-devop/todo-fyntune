@@ -8,6 +8,7 @@ import { todoSchema } from "../lib/schemas/schemas";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient} from "@tanstack/react-query"
 import { fetcher } from "../lib/fetcher";
+import { toast } from "sonner";
 
 export default function Modal<T extends TodoSchemaType>({
     type,
@@ -66,6 +67,7 @@ export default function Modal<T extends TodoSchemaType>({
             }, {
                 onSuccess: ()=>{
                     setOpen(false)
+                    toast.success("Todo Created Successfully")
                 }
             })
         }
@@ -76,6 +78,7 @@ export default function Modal<T extends TodoSchemaType>({
                 body: data
             }, {
                 onSuccess: ()=>{
+                    toast.success("Edited Successfully")
                     setOpen(false)
                 }
             })
